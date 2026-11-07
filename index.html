@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Indicators & Determinants of Health - Academic Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for medical & UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        clinical: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        transition-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-clinical-100 dark:bg-clinical-900 text-clinical-800 dark:text-clinical-100 font-sans h-full flex flex-col antialiased">
+
+    <!-- Top Header -->
+    <header class="bg-white dark:bg-clinical-800 border-b border-clinical-200 dark:border-clinical-700 h-16 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0">
+        <div class="flex items-center space-x-3">
+            <button id="sidebarToggle" class="text-clinical-700 dark:text-clinical-200 hover:text-medical-600 focus:outline-none md:hidden p-2">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="bg-medical-600 text-white p-2 rounded-xl shadow-md">
+                    <i class="fa-solid fa-heart-pulse text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight">Community Health Nursing</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Dr. Asmaa Ghareeb Mohamed</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search & Global Controls -->
+        <div class="flex items-center space-x-3">
+            <div class="relative hidden sm:block w-64 md:w-80">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-search"></i>
+                </span>
+                <input type="text" id="globalSearch" placeholder="Search lecture topics..." 
+                    class="w-full pl-10 pr-4 py-2 bg-clinical-50 dark:bg-clinical-900 border border-clinical-200 dark:border-clinical-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-medical-500 transition">
+            </div>
+            <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-clinical-50 dark:bg-clinical-900 border border-clinical-200 dark:border-clinical-700 text-slate-600 dark:text-slate-300 hover:bg-clinical-200 transition">
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:inline"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- App Body Layout -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-20 w-72 bg-white dark:bg-clinical-800 border-r border-clinical-200 dark:border-clinical-700 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+            <div class="p-4 border-b border-clinical-200 dark:border-clinical-700">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation Menu</span>
+            </div>
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition active-tab text-medical-600 dark:text-medical-400 bg-medical-50 dark:bg-medical-900/30" data-target="dashboard">
+                    <i class="fa-solid fa-house-chimney-medical w-5 text-center"></i>
+                    <span>Dashboard Overview</span>
+                </button>
+                <button onclick="switchTab('summary')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="summary">
+                    <i class="fa-solid fa-book-medical w-5 text-center"></i>
+                    <span>Comprehensive Summary</span>
+                </button>
+                <button onclick="switchTab('indicators')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="indicators">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    <span>12 Health Indicators</span>
+                </button>
+                <button onclick="switchTab('determinants')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="determinants">
+                    <i class="fa-solid fa-circle-nodes w-5 text-center"></i>
+                    <span>Determinants Explorer</span>
+                </button>
+                <button onclick="switchTab('economics')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="economics">
+                    <i class="fa-solid fa-coins w-5 text-center"></i>
+                    <span>Health Economics</span>
+                </button>
+                <button onclick="switchTab('flashcards')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="flashcards">
+                    <i class="fa-solid fa-clone w-5 text-center"></i>
+                    <span>Interactive Flashcards</span>
+                </button>
+                <button onclick="switchTab('quiz')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-clinical-100 dark:hover:bg-clinical-700" data-target="quiz">
+                    <i class="fa-solid fa-graduation-cap w-5 text-center"></i>
+                    <span>Self-Assessment Quiz</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-clinical-200 dark:border-clinical-700 text-xs text-slate-500 text-center">
+                Community Health Nursing Course &copy; 2026
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-8" id="mainContent">
+
+            <!-- TAB 1: DASHBOARD OVERVIEW -->
+            <div id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-medical-700 to-medical-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute right-0 top-0 transform translate-x-8 -translate-y-8 opacity-10 pointer-events-none">
+                        <i class="fa-solid fa-heart-pulse text-9xl"></i>
+                    </div>
+                    <div class="max-w-3xl relative z-10">
+                        <span class="bg-medical-500 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Lecture 5 Interactive Review</span>
+                        <h2 class="text-2xl sm:text-4xl font-bold mt-3 mb-2">Health Indicators and Determinants of Health</h2>
+                        <p class="text-medical-100 text-sm sm:text-base leading-relaxed mb-6">
+                            Master the concepts of health measurement indices, characteristics of valid health indicators, all 12 categories of health indicators, core determinants of health, and health economics.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="switchTab('summary')" class="bg-white text-medical-900 font-semibold px-5 py-2.5 rounded-xl shadow hover:bg-medical-50 transition text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-book-open"></i>
+                                <span>Start Reading Notes</span>
+                            </button>
+                            <button onclick="switchTab('quiz')" class="bg-medical-600 border border-medical-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow hover:bg-medical-500 transition text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>Take Knowledge Quiz</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-clinical-800 p-5 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm flex items-center space-x-4">
+                        <div class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 p-3 rounded-xl">
+                            <i class="fa-solid fa-chart-bar text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Indicator Categories</p>
+                            <h3 class="text-xl font-bold">12 Types</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-clinical-800 p-5 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm flex items-center space-x-4">
+                        <div class="bg-medical-100 dark:bg-medical-900/40 text-medical-600 dark:text-medical-400 p-3 rounded-xl">
+                            <i class="fa-solid fa-circle-nodes text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Determinants</p>
+                            <h3 class="text-xl font-bold">8 Key Factors</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-clinical-800 p-5 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm flex items-center space-x-4">
+                        <div class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 p-3 rounded-xl">
+                            <i class="fa-solid fa-clone text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Flashcards</p>
+                            <h3 class="text-xl font-bold">15 Decks</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-clinical-800 p-5 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm flex items-center space-x-4">
+                        <div class="bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 p-3 rounded-xl">
+                            <i class="fa-solid fa-clipboard-question text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Quiz Questions</p>
+                            <h3 class="text-xl font-bold">10 MCQs</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Navigation Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div onclick="switchTab('summary')" class="bg-white dark:bg-clinical-800 p-6 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm hover:shadow-md transition cursor-pointer group">
+                        <div class="text-medical-600 dark:text-medical-400 mb-4 text-2xl group-hover:scale-110 transition transform">
+                            <i class="fa-solid fa-book-medical"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Comprehensive Summary</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Deep dive into definitions, WHO indicators, mortality & morbidity formulas, and health economics.</p>
+                    </div>
+                    <div onclick="switchTab('determinants')" class="bg-white dark:bg-clinical-800 p-6 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm hover:shadow-md transition cursor-pointer group">
+                        <div class="text-blue-600 dark:text-blue-400 mb-4 text-2xl group-hover:scale-110 transition transform">
+                            <i class="fa-solid fa-circle-nodes"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Determinants Explorer</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Explore biological, environmental, behavioral, socioeconomic, and gender determinants shaping population health.</p>
+                    </div>
+                    <div onclick="switchTab('flashcards')" class="bg-white dark:bg-clinical-800 p-6 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm hover:shadow-md transition cursor-pointer group">
+                        <div class="text-amber-600 dark:text-amber-400 mb-4 text-2xl group-hover:scale-110 transition transform">
+                            <i class="fa-solid fa-clone"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Interactive Flashcards</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm">Test your memory on crucial community nursing terminology, metrics, and definitions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: COMPREHENSIVE SUMMARY -->
+            <div id="tab-summary" class="tab-content space-y-8 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm">
+                    <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-clinical-200 dark:border-clinical-700">
+                        <div class="bg-medical-100 dark:bg-medical-900/40 text-medical-600 p-3 rounded-xl">
+                            <i class="fa-solid fa-book-medical text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold">Lecture 5 Comprehensive Summary</h2>
+                            <p class="text-sm text-slate-500">Instructor: Dr. Asmaa Ghareeb Mohamed | Community Health Nursing</p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Navigation Pills -->
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <button onclick="scrollToSection('sec-intro')" class="px-4 py-2 bg-clinical-100 dark:bg-clinical-700 hover:bg-medical-50 dark:hover:bg-medical-900/40 text-sm font-medium rounded-xl transition">1. Introduction & Characteristics</button>
+                        <button onclick="scrollToSection('sec-uses')" class="px-4 py-2 bg-clinical-100 dark:bg-clinical-700 hover:bg-medical-50 dark:hover:bg-medical-900/40 text-sm font-medium rounded-xl transition">2. Uses of Indicators</button>
+                        <button onclick="scrollToSection('sec-types')" class="px-4 py-2 bg-clinical-100 dark:bg-clinical-700 hover:bg-medical-50 dark:hover:bg-medical-900/40 text-sm font-medium rounded-xl transition">3. 12 Types of Indicators</button>
+                        <button onclick="scrollToSection('sec-determinants')" class="px-4 py-2 bg-clinical-100 dark:bg-clinical-700 hover:bg-medical-50 dark:hover:bg-medical-900/40 text-sm font-medium rounded-xl transition">4. Determinants of Health</button>
+                        <button onclick="scrollToSection('sec-economics')" class="px-4 py-2 bg-clinical-100 dark:bg-clinical-700 hover:bg-medical-50 dark:hover:bg-medical-900/40 text-sm font-medium rounded-xl transition">5. Health Economics</button>
+                    </div>
+
+                    <div class="space-y-10 text-slate-700 dark:text-slate-300">
+                        <!-- Section 1 -->
+                        <div id="sec-intro" class="space-y-4">
+                            <h3 class="text-lg font-bold text-medical-700 dark:text-medical-400 flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>1. Introduction & Characteristics of Health Indicators</span>
+                            </h3>
+                            <p class="leading-relaxed">
+                                An <strong>Indicator</strong> (also termed Index or Variable) is an indication of a given situation or a reflection of that situation. A <strong>Health Indicator</strong> is a variable, susceptible to direct measurement, that reflects the state of health of persons in a community. Health measurement is often framed in terms of illness (or lack of health), consequences of ill-health (morbidity, mortality), and economic, occupational, and domestic factors that promote ill health.
+                            </p>
+                            <p class="leading-relaxed">
+                                <strong>WHO Definition:</strong> "Variables which measure change." Health indicators help measure the extent to which objectives and targets of a program are attained. A <strong>Health Index</strong> is a numerical indication of the health of a given population derived from a specified composite formula.
+                            </p>
+                            <div class="bg-clinical-50 dark:bg-clinical-900/50 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                <h4 class="font-bold text-sm mb-3 uppercase tracking-wider text-medical-600">Characteristics of Good Health Indicators:</h4>
+                                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Valid:</strong> Measure what they are supposed to measure.</span></li>
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Reliable:</strong> Same results when measured by different people under similar circumstances.</span></li>
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Sensitive:</strong> Sensitive to changes in the situation concerned.</span></li>
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Specific:</strong> Reflect changes only in the situation concerned.</span></li>
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Feasible:</strong> Ability to obtain data when needed.</span></li>
+                                    <li class="flex items-start space-x-2"><i class="fa-solid fa-check text-medical-600 mt-1"></i><span><strong>Relevant:</strong> Contribute to understanding the phenomenon of interest.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div id="sec-uses" class="space-y-4 pt-6 border-t border-clinical-200 dark:border-clinical-700">
+                            <h3 class="text-lg font-bold text-medical-700 dark:text-medical-400 flex items-center space-x-2">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <span>2. Uses of Indicators of Health</span>
+                            </h3>
+                            <ul class="space-y-2 list-disc list-inside leading-relaxed">
+                                <li>Measurement and description of the health of the community.</li>
+                                <li>Comparison of the health of different communities.</li>
+                                <li>Identification of health needs and prioritizing them.</li>
+                                <li>Communicating critical information about population health.</li>
+                                <li>Supporting planning (identifying priorities, developing/targeting resources, tracking progress).</li>
+                                <li>Concurrent and terminal evaluation of health services.</li>
+                                <li>Informing policy and policymakers to promote accountability among governmental and non-governmental agencies.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div id="sec-types" class="space-y-6 pt-6 border-t border-clinical-200 dark:border-clinical-700">
+                            <h3 class="text-lg font-bold text-medical-700 dark:text-medical-400 flex items-center space-x-2">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>3. The 12 Types of Health Indicators</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">I. Mortality Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Includes Crude Death Rate (CDR: ~7.48 deaths/1000 population), Expectation of Life (65.2 yrs general; 64.3 male; 66.1 female), Infant Mortality Rate (IMR: 67/1000 live births), Child Mortality Rate (1-4 yrs: 18/1000), Maternal Mortality Rate (MMR: 212/100,000 live births), and Disease Specific Death Rate (e.g., TB mortality 23/100,000).</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">II. Morbidity Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Reveals burden of ill-health. Includes <strong>Incidence</strong> (new cases, e.g., TB incidence 168/100,000), <strong>Prevalence</strong> (total existing cases at a time, e.g., TB prevalence 249/100,000), Notification rates, OPD attendance, admission/discharge rates, and absence from work/school.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">III. Disability Rates</h4>
+                                    <p class="text-sm leading-relaxed">Event-type (bed disability days, work loss) and Person-type (mobility limitations, basic ADLs like eating/dressing). <strong>Sullivan's Index:</strong> Expectation of life free of disability (Life expectancy minus probable duration of bed disability).</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">IV. Nutritional Status Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Positive health indicator. Newborn birth weight, length, head circumference. Preschool anthropometry (weight for acute malnutrition, height & mid-arm for chronic). Adults: underweight, obesity, anemia.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">V. Health Care Delivery Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Reflect equity of distribution of health resources: Doctor-population ratio, Nurse-population ratio, Population-bed ratio.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">VI. Utilization Rates</h4>
+                                    <p class="text-sm leading-relaxed">Proportion of people in need receiving services (e.g., 43% fully immunized infants, ANC care, institutional deliveries, family planning adoption, bed occupancy).</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">VII. Social & Mental Health</h4>
+                                    <p class="text-sm leading-relaxed">Rates of suicide, homicide, crime, road traffic accidents, juvenile delinquency, alcohol/substance abuse, domestic violence, battered-baby syndrome.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">VIII. Environmental Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Proportion of population with access to safe drinking water and sanitation facilities, air/water pollution, radiation, noise pollution, toxic substances.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">IX. Socioeconomic Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Per capita income, level of unemployment, literacy rate, per capita caloric availability, total fertility rate, contraceptive use.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">X. Health Policy Indicators</h4>
+                                    <p class="text-sm leading-relaxed">Political commitment: Proportion of GNP spent on health services, health-related activities (water, sanitation, housing, nutrition), and primary health care.</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">XI. Quality of Life Indicators</h4>
+                                    <p class="text-sm leading-relaxed"><strong>PQLI:</strong> Infant mortality, life expectancy at age 1, and literacy (scale 1-100). <strong>HDI:</strong> Longevity (life expectancy), Knowledge (adult literacy & schooling), Income (real GDP per capita).</p>
+                                </div>
+                                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                                    <h4 class="font-bold text-medical-600 mb-2">XII. Other Indicator Series</h4>
+                                    <p class="text-sm leading-relaxed">UN Social Indicators (12 categories including population, family formation, learning, income distribution, housing, etc.) & ILO Basic Needs Indicators.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div id="sec-determinants" class="space-y-4 pt-6 border-t border-clinical-200 dark:border-clinical-700">
+                            <h3 class="text-lg font-bold text-medical-700 dark:text-medical-400 flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-nodes"></i>
+                                <span>4. Determinants of Health</span>
+                            </h3>
+                            <p class="leading-relaxed">
+                                Health is determined by a complex interaction of multiple factors:
+                            </p>
+                            <ul class="space-y-3 list-disc list-inside leading-relaxed">
+                                <li><strong>Biological (Human Biology):</strong> Genetic makeup, chromosomal anomalies, maturation, and aging processes.</li>
+                                <li><strong>Environment:</strong> Internal environment (homeostasis, temperature around 37°C for optimal enzyme activity) and External environment (Physical: air, water, soil; Biological: plants, animals, microorganisms/zoonotic diseases; Social: culture, traditions, stress, NCD risk factors, labor market, poverty).</li>
+                                <li><strong>Behavioral & Sociocultural:</strong> Lifestyle, habits, personal hygiene, nutrition, sleep, physical activity vs. harmful habits (smoking, alcohol, poor hygiene).</li>
+                                <li><strong>Socioeconomic Conditions:</strong> Income, education/illiteracy, employment, housing, political system, social status.</li>
+                                <li><strong>Health Services:</strong> Accessibility, acceptability, adequacy of doctor-patient and nurse-population ratios, immunization coverage.</li>
+                                <li><strong>Aging of the Population:</strong> Increased elderly due to medical, sanitary, and pharmacological advancements.</li>
+                                <li><strong>Gender:</strong> Biological and social vulnerabilities of women (malnutrition, anemia, reproductive health, socioeconomic inequality).</li>
+                            </ul>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div id="sec-economics" class="space-y-4 pt-6 border-t border-clinical-200 dark:border-clinical-700">
+                            <h3 class="text-lg font-bold text-medical-700 dark:text-medical-400 flex items-center space-x-2">
+                                <i class="fa-solid fa-coins"></i>
+                                <span>5. Health Economics</span>
+                            </h3>
+                            <p class="leading-relaxed">
+                                <strong>Definition:</strong> Health economics is the study of the distribution of health care. It is a branch of economics concerned with issues related to efficiency, effectiveness, value, and behavior in the production and consumption of health and health care, dealing fundamentally with scarcity in resource allocation.
+                            </p>
+                            <p class="leading-relaxed">
+                                <strong>Need for Health Economics:</strong> Rising costs due to medical advances (organ transplants, gene therapy), increasing life expectancy requiring long-term care for the elderly, changing family structures, and higher public expectations and awareness.
+                            </p>
+                            <p class="leading-relaxed">
+                                <strong>Importance:</strong> Formulating health policy, establishing true costs (including patient time and loss of output), evaluating relative costs and benefits, estimating economic variables (user charges, travel distance), and evaluating planning and budgeting systems.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: 12 HEALTH INDICATORS (Interactive breakdown) -->
+            <div id="tab-indicators" class="tab-content space-y-6 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-2">The 12 Types of Health Indicators</h2>
+                    <p class="text-sm text-slate-500 mb-6">Explore the full spectrum of community health measurement tools discussed in the lecture.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="indicatorCardsGrid">
+                        <!-- Populated via JS or static HTML cards -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: DETERMINANTS EXPLORER -->
+            <div id="tab-determinants" class="tab-content space-y-6 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-2">Determinants of Health Explorer</h2>
+                    <p class="text-sm text-slate-500 mb-6">Click on any determinant wheel sector or card below to inspect its detailed role in community health.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="determinantsGrid">
+                        <!-- Interactive cards for determinants -->
+                    </div>
+
+                    <div id="determinantDetailBox" class="mt-8 bg-clinical-50 dark:bg-clinical-900 p-6 rounded-2xl border border-clinical-200 dark:border-clinical-700 hidden">
+                        <h3 id="detDetailTitle" class="text-lg font-bold text-medical-600 mb-2"></h3>
+                        <p id="detDetailText" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: HEALTH ECONOMICS -->
+            <div id="tab-economics" class="tab-content space-y-6 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm space-y-6">
+                    <div class="flex items-center space-x-3 pb-4 border-b border-clinical-200 dark:border-clinical-700">
+                        <div class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 p-3 rounded-xl">
+                            <i class="fa-solid fa-coins text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold">Health Economics Module</h2>
+                            <p class="text-sm text-slate-500">Allocation, Efficiency, and Scarcity in Health Care</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-clinical-50 dark:bg-clinical-900/50 p-6 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                            <h3 class="font-bold text-medical-600 mb-3 flex items-center space-x-2">
+                                <i class="fa-solid fa-book"></i>
+                                <span>Definition</span>
+                            </h3>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                Branch of economics concerned with scarcity in resource allocation, efficiency, effectiveness, value, and behavior in the production and consumption of health care. Focuses on maximizing benefits (reducing disease burden) for money invested.
+                            </p>
+                        </div>
+                        <div class="bg-clinical-50 dark:bg-clinical-900/50 p-6 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                            <h3 class="font-bold text-medical-600 mb-3 flex items-center space-x-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>Need for Study</span>
+                            </h3>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                Rising costs driven by medical advances (gene therapy, organ transplants), increasing life expectancy requiring elderly care, changing family norms, and higher public awareness of health rights.
+                            </p>
+                        </div>
+                        <div class="bg-clinical-50 dark:bg-clinical-900/50 p-6 rounded-xl border border-clinical-200 dark:border-clinical-700">
+                            <h3 class="font-bold text-medical-600 mb-3 flex items-center space-x-2">
+                                <i class="fa-solid fa-star"></i>
+                                <span>Importance</span>
+                            </h3>
+                            <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                Formulating health policies, estimating true delivery costs (including patient time), evaluating cost-benefit options, assessing user charges and distance accessibility, and improving budgeting systems.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: FLASHCARDS -->
+            <div id="tab-flashcards" class="tab-content space-y-6 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm text-center max-w-2xl mx-auto">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-2">Interactive Flashcards</h2>
+                    <p class="text-sm text-slate-500 mb-8">Test your mastery of key definitions and lecture metrics. Click the card to flip!</p>
+
+                    <div class="perspective-1000 w-full h-64 cursor-pointer mb-6" onclick="flipCard()">
+                        <div id="flashcardInner" class="relative w-full h-full duration-500 transform-style-3d shadow-lg rounded-2xl">
+                            <!-- Front -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-medical-700 to-medical-900 text-white p-8 rounded-2xl flex flex-col justify-between backface-hidden">
+                                <span class="text-xs uppercase tracking-wider bg-medical-600 px-3 py-1 rounded-full self-start">Question / Term</span>
+                                <div class="my-auto">
+                                    <h3 id="fcFrontText" class="text-xl font-bold">Loading...</h3>
+                                </div>
+                                <span class="text-xs text-medical-200"><i class="fa-solid fa-rotate"></i> Click to flip</span>
+                            </div>
+                            <!-- Back -->
+                            <div class="absolute inset-0 bg-white dark:bg-clinical-700 text-slate-800 dark:text-white p-8 rounded-2xl flex flex-col justify-between backface-hidden rotate-y-180 border border-clinical-200 dark:border-clinical-600">
+                                <span class="text-xs uppercase tracking-wider bg-slate-200 dark:bg-clinical-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full self-start">Answer</span>
+                                <div class="my-auto">
+                                    <p id="fcBackText" class="text-base sm:text-lg font-medium leading-relaxed">Loading...</p>
+                                </div>
+                                <span class="text-xs text-slate-400"><i class="fa-solid fa-rotate"></i> Click to flip back</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flashcard Controls -->
+                    <div class="flex items-center justify-between">
+                        <button onclick="prevFlashcard()" class="px-5 py-2.5 bg-clinical-100 dark:bg-clinical-700 hover:bg-clinical-200 rounded-xl font-medium text-sm transition flex items-center space-x-2">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Previous</span>
+                        </button>
+                        <span id="fcCounter" class="text-sm font-semibold text-slate-500">1 / 15</span>
+                        <button onclick="nextFlashcard()" class="px-5 py-2.5 bg-medical-600 hover:bg-medical-700 text-white rounded-xl font-medium text-sm transition flex items-center space-x-2">
+                            <span>Next</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: QUIZ / ASSESSMENT -->
+            <div id="tab-quiz" class="tab-content space-y-6 hidden">
+                <div class="bg-white dark:bg-clinical-800 p-6 sm:p-8 rounded-2xl border border-clinical-200 dark:border-clinical-700 shadow-sm max-w-3xl mx-auto">
+                    <div id="quizContainer">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-clinical-200 dark:border-clinical-700">
+                            <div>
+                                <h2 class="text-xl font-bold">Self-Assessment Knowledge Quiz</h2>
+                                <p class="text-xs text-slate-500">Test your comprehension of Dr. Asmaa Ghareeb Mohamed's lecture</p>
+                            </div>
+                            <span id="quizProgress" class="text-sm font-semibold bg-medical-50 dark:bg-medical-900/40 text-medical-600 px-3 py-1 rounded-full">Question 1 of 10</span>
+                        </div>
+
+                        <div id="questionBox" class="space-y-6">
+                            <h3 id="quizQuestion" class="text-lg font-bold text-slate-800 dark:text-slate-100">Loading question...</h3>
+                            <div id="quizOptions" class="space-y-3">
+                                <!-- Options injected via JS -->
+                            </div>
+                        </div>
+
+                        <div id="quizControls" class="mt-8 flex justify-between items-center hidden">
+                            <p id="quizFeedback" class="text-sm font-semibold"></p>
+                            <button onclick="nextQuizQuestion()" class="px-6 py-2.5 bg-medical-600 hover:bg-medical-700 text-white rounded-xl font-medium text-sm transition">
+                                Next Question
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Results Screen -->
+                    <div id="quizResults" class="hidden text-center py-8 space-y-6">
+                        <div class="w-20 h-20 bg-medical-100 dark:bg-medical-900/40 text-medical-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold">Quiz Completed!</h2>
+                        <p id="quizScoreText" class="text-lg font-medium text-slate-600 dark:text-slate-300">You scored X out of Y</p>
+                        <button onclick="restartQuiz()" class="px-6 py-3 bg-medical-600 hover:bg-medical-700 text-white rounded-xl font-medium text-sm transition">
+                            Retake Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data Store
+        const flashcardsData = [
+            { front: "Health Indicator Definition", back: "A variable, susceptible to direct measurement, that reflects the state of health of persons in a community." },
+            { front: "WHO Indicator Definition", back: "Variables which measure change." },
+            { front: "Characteristics of Indicators", back: "Valid, Reliable, Sensitive, Specific, Feasible, and Relevant." },
+            { front: "Crude Death Rate (CDR)", back: "Number of deaths per 1,000 population per year in a given community (~7.48 deaths/1,000)." },
+            { front: "Expectation of Life", back: "Average number of years that will be lived by those born alive if current age-specific mortality rates persist (General: 65.2 yrs)." },
+            { front: "Infant Mortality Rate (IMR)", back: "Ratio of deaths under 1 year of age to total live births, expressed per 1,000 live births (Current: 67/1,000)." },
+            { front: "Maternal Mortality Rate (MMR)", back: "Number of deaths arising during pregnancy or puerperal period per 100,000 live births (India: 212/100,000)." },
+            { front: "Incidence vs Prevalence", back: "Incidence measures new cases in a specified period. Prevalence measures total existing cases at a particular cross-sectional time." },
+            { front: "Sullivan's Index", back: "Expectation of life free of disability (Life expectancy minus probable duration of bed disability)." },
+            { front: "Nutritional Anthropometry", back: "Weight measures acute malnutrition; height and mid-arm circumference measure chronic malnutrition in preschoolers." },
+            { front: "PQLI Components", back: "Physical Quality of Life Index combines: Infant mortality, Life expectancy at age 1, and Literacy." },
+            { front: "Human Development Index (HDI)", back: "Combines 3 dimensions: Longevity (life expectancy), Knowledge (adult literacy & schooling), and Income (real GDP per capita)." },
+            { front: "Internal Environment", back: "Environment inside an organism (cells, tissues, organs) maintained constant (e.g., temperature around 37°C for optimal enzyme activity)." },
+            { front: "Health Economics Focus", back: "Study of distribution of health care; focuses on maximizing benefits (reducing disease burden) for money invested amidst scarcity." },
+            { front: "Health Policy Indicator", back: "Proportion of Gross National Product (GNP) spent on health services and primary health care as a measure of political commitment." }
+        ];
+
+        const indicatorsList = [
+            { title: "I. Mortality Indicators", desc: "Crude Death Rate, Expectation of Life, Infant Mortality Rate, Child Mortality Rate (1-4 yrs: 18/1000), Maternal Mortality Rate (212/100,000), and Disease Specific Death Rate.", icon: "fa-skull" },
+            { title: "II. Morbidity Indicators", desc: "Reveals burden of ill-health: Incidence (e.g. TB 168/100k), Prevalence (e.g. TB 249/100k), Notification rates, OPD attendance, admission/discharge rates, and absence from work/school.", icon: "fa-virus" },
+            { title: "III. Disability Rates", desc: "Event-type indicators (restricted activity, bed disability days) and Person-type indicators (mobility limitations, ADLs). Sullivan's Index.", icon: "fa-wheelchair" },
+            { title: "IV. Nutritional Status", desc: "Newborn birth weight, length, head circumference. Preschool anthropometry (weight for acute, height/mid-arm for chronic). Adult underweight, obesity, anemia.", icon: "fa-apple-whole" },
+            { title: "V. Health Care Delivery", desc: "Reflects equity of resource distribution: Doctor-population ratio, Nurse-population ratio, and Population-bed ratio.", icon: "fa-hospital" },
+            { title: "VI. Utilization Rates", desc: "Proportion of people in need receiving services (e.g. 43% fully immunized infants, ANC care, institutional deliveries, family planning adoption).", icon: "fa-hand-holding-medical" },
+            { title: "VII. Social & Mental Health", desc: "Suicide, homicide, crime, road traffic accidents, juvenile delinquency, alcohol/substance abuse, domestic violence, battered-baby syndrome.", icon: "fa-brain" },
+            { title: "VIII. Environmental Indicators", desc: "Access to safe drinking water and sanitation facilities, air/water pollution, radiation, noise pollution, toxic exposures.", icon: "fa-earth-americas" },
+            { title: "IX. Socioeconomic Indicators", desc: "Per capita income, unemployment level, literacy rate, per capita caloric availability, total fertility rate, contraceptive use.", icon: "fa-chart-line" },
+            { title: "X. Health Policy Indicators", desc: "Political commitment: Proportion of GNP spent on health services, water/sanitation, housing, nutrition, and primary health care.", icon: "fa-file-contract" },
+            { title: "XI. Quality of Life", desc: "PQLI (infant mortality, life expectancy at age 1, literacy) and HDI (longevity, knowledge, real GDP per capita).", icon: "fa-star" },
+            { title: "XII. Other Indicator Series", desc: "UN Social Indicators (12 categories) and ILO Basic Needs Indicators (calorie consumption, access to water, rooms per person, GNP).", icon: "fa-list-check" }
+        ];
+
+        const determinantsList = [
+            { title: "Biological (Human Biology)", desc: "Encompasses aspects determined by organic structure and physiological functioning. Genetic makeup, predisposition to hereditary disorders, chromosomal anomalies, and aging processes.", icon: "fa-dna" },
+            { title: "Environment", desc: "Internal environment (homeostasis, maintaining body temperature around 37°C for optimal enzyme activity) and External environment (Physical air/water/soil, Biological plants/animals/microbes, Social culture/stress/NCD risks).", icon: "fa-seedling" },
+            { title: "Behavioral & Sociocultural", desc: "Lifestyle, personal habits, culture, traditions, adequate nutrition, sleep, physical activity vs. harmful habits like smoking, alcohol, and poor hygiene.", icon: "fa-person-walking" },
+            { title: "Socioeconomic Conditions", desc: "Income, education/illiteracy, employment, housing, and political system. Gaps between richest and poorest drive health disparities.", icon: "fa-wallet" },
+            { title: "Health Services", desc: "Accessibility, acceptability, adequacy of doctor-population and nurse-population ratios, and immunization coverage in urban slums and rural areas.", icon: "fa-user-doctor" },
+            { title: "Aging of the Population", desc: "Increased proportion of elderly due to medical, sanitary, and pharmacological innovations (vaccines, antibiotics) reducing infection mortality.", icon: "fa-person-cane" },
+            { title: "Gender", desc: "Biological and social vulnerabilities of women (malnutrition, anemia, reproductive health, occupational health, and societal inequality).", icon: "fa-venus" }
+        ];
+
+        const quizData = [
+            {
+                q: "What is the WHO definition of Health Indicators?",
+                options: [
+                    "Exact mathematical formulas of disease prevalence",
+                    "Variables which measure change",
+                    "Economic indicators of hospital performance",
+                    "Measures of physician working hours"
+                ],
+                answer: 1,
+                explanation: "WHO defines indicators as 'variables which measure change' helping to measure program objectives and targets."
+            },
+            {
+                q: "Which of the following is NOT one of the six key characteristics of good health indicators?",
+                options: ["Valid", "Reliable", "Expensive", "Feasible"],
+                answer: 2,
+                explanation: "Good health indicators must be Valid, Reliable, Sensitive, Specific, Feasible, and Relevant."
+            },
+            {
+                q: "What does Infant Mortality Rate (IMR) measure?",
+                options: [
+                    "Deaths under 1 year of age per 1,000 live births",
+                    "Deaths between ages 1-4 per 1,000 children",
+                    "Maternal deaths per 100,000 live births",
+                    "Stillbirths per 1,000 deliveries"
+                ],
+                answer: 0,
+                explanation: "IMR is the ratio of deaths under 1 year of age to total live births, expressed per 1,000 live births."
+            },
+            {
+                q: "What does Sullivan's Index refer to?",
+                options: [
+                    "Expectation of life free of disability",
+                    "Per capita income in purchasing power parity",
+                    "Proportion of GNP spent on primary health care",
+                    "Ratio of doctors to population"
+                ],
+                answer: 0,
+                explanation: "Sullivan's Index refers to 'expectation of life free of disability', calculated as life expectancy minus probable duration of bed disability."
+            },
+            {
+                q: "In preschool anthropometry, what does weight measure?",
+                options: ["Chronic malnutrition", "Acute malnutrition", "Genetics", "Cognitive development"],
+                answer: 1,
+                explanation: "Weight measures acute malnutrition, while height and mid-arm circumference measure chronic malnutrition."
+            },
+            {
+                q: "What do Physical Quality of Life Index (PQLI) and HDI measure?",
+                options: [
+                    "Quality of Life and socioeconomic development dimensions",
+                    "Hospital bed turnover rates",
+                    "Bacteriological water contamination",
+                    "Incidence of vector-borne diseases"
+                ],
+                answer: 0,
+                explanation: "PQLI and HDI combine longevity, knowledge, income, and infant mortality to measure quality of life and development."
+            },
+            {
+                q: "What is the optimal internal body temperature required for optimal enzyme activity in humans?",
+                options: ["35 °C", "37 °C", "39 °C", "36.5 °C"],
+                answer: 1,
+                explanation: "Internal body temperature needs to be maintained around 37 °C for optimal enzyme activity."
+            },
+            {
+                q: "What distinguishes Incidence from Prevalence?",
+                options: [
+                    "Incidence measures new cases in a specified period, whereas prevalence measures total existing cases at a particular time.",
+                    "Prevalence measures only fatal cases.",
+                    "Incidence applies only to chronic non-communicable diseases.",
+                    "There is no difference between them."
+                ],
+                answer: 0,
+                explanation: "Incidence tracks new events/cases over a time period, while prevalence measures cross-sectional existing disease burden."
+            },
+            {
+                q: "What is the primary focus of Health Economics?",
+                options: [
+                    "Maximizing profits for pharmaceutical companies",
+                    "Providing maximum benefits for the money invested in health care amidst scarcity",
+                    "Eliminating private hospitals entirely",
+                    "Managing hospital cafeteria budgets"
+                ],
+                answer: 1,
+                explanation: "Health economics deals with scarcity and focuses on providing maximum benefits (reducing disease burden) for the money invested."
+            },
+            {
+                q: "Which indicator serves as a single most important sign of political commitment?",
+                options: [
+                    "Proportion of GNP spent on health services and primary care",
+                    "Total number of registered pharmacies",
+                    "Average number of hospital parking spaces",
+                    "Number of medical textbooks published annually"
+                ],
+                answer: 0,
+                explanation: "Allocation of adequate resources (proportion of GNP spent on health services and primary care) indicates political commitment."
+            }
+        ];
+
+        // State variables
+        let currentFlashcardIndex = 0;
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let userAnswers = [];
+
+        // Initialization
+        window.onload = function() {
+            renderIndicatorsGrid();
+            renderDeterminantsGrid();
+            updateFlashcard();
+            setupSearch();
+        };
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-medical-600', 'dark:text-medical-400', 'bg-medical-50', 'dark:bg-medical-900/30');
+                btn.classList.add('text-slate-600', 'dark:text-slate-300');
+                if(btn.dataset.target === tabId) {
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-300');
+                    btn.classList.add('text-medical-600', 'dark:text-medical-400', 'bg-medical-50', 'dark:bg-medical-900/30');
+                }
+            });
+
+            // Close sidebar on mobile after clicking
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+
+        function scrollToSection(secId) {
+            switchTab('summary');
+            setTimeout(() => {
+                const el = document.getElementById(secId);
+                if(el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Render Grids
+        function renderIndicatorsGrid() {
+            const grid = document.getElementById('indicatorCardsGrid');
+            grid.innerHTML = indicatorsList.map(item => `
+                <div class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700 hover:shadow-md transition">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="bg-medical-100 dark:bg-medical-900/50 text-medical-600 p-2.5 rounded-lg">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <h3 class="font-bold text-sm sm:text-base">${item.title}</h3>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${item.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderDeterminantsGrid() {
+            const grid = document.getElementById('determinantsGrid');
+            grid.innerHTML = determinantsList.map((item, idx) => `
+                <div onclick="showDeterminantDetail(${idx})" class="bg-clinical-50 dark:bg-clinical-900/40 p-5 rounded-xl border border-clinical-200 dark:border-clinical-700 hover:border-medical-500 cursor-pointer transition group">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 p-2.5 rounded-lg group-hover:scale-110 transition">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <h3 class="font-bold text-sm">${item.title}</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 line-clamp-2">${item.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function showDeterminantDetail(idx) {
+            const item = determinantsList[idx];
+            const box = document.getElementById('determinantDetailBox');
+            box.classList.remove('hidden');
+            document.getElementById('detDetailTitle').innerText = item.title;
+            document.getElementById('detDetailText').innerText = item.desc;
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Flashcards Logic
+        function updateFlashcard() {
+            const fc = flashcardsData[currentFlashcardIndex];
+            document.getElementById('fcFrontText').innerText = fc.front;
+            document.getElementById('fcBackText').innerText = fc.back;
+            document.getElementById('fcCounter').innerText = `${currentFlashcardIndex + 1} / ${flashcardsData.length}`;
+            // Reset rotation if flipped
+            document.getElementById('flashcardInner').style.transform = 'rotateY(0deg)';
+        }
+
+        function flipCard() {
+            const inner = document.getElementById('flashcardInner');
+            if(inner.style.transform === 'rotateY(180deg)') {
+                inner.style.transform = 'rotateY(0deg)';
+            } else {
+                inner.style.transform = 'rotateY(180deg)';
+            }
+        }
+
+        function nextFlashcard() {
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcardsData.length;
+            updateFlashcard();
+        }
+
+        function prevFlashcard() {
+            currentFlashcardIndex = (currentFlashcardIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            updateFlashcard();
+        }
+
+        // Quiz Logic
+        function loadQuizQuestion() {
+            if(currentQuizIndex >= quizData.length) {
+                showQuizResults();
+                return;
+            }
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quizProgress').innerText = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quizQuestion').innerText = q.q;
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = q.options.map((opt, idx) => `
+                <button onclick="selectQuizOption(${idx})" class="quiz-opt w-full text-left p-4 rounded-xl border border-clinical-200 dark:border-clinical-700 bg-clinical-50 dark:bg-clinical-900/40 hover:bg-medical-50 dark:hover:bg-medical-900/20 font-medium text-sm transition flex items-center justify-between">
+                    <span>${opt}</span>
+                    <span class="w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center text-xs"></span>
+                </button>
+            `).join('');
+            document.getElementById('quizControls').classList.add('hidden');
+        }
+
+        function selectQuizOption(selectedIdx) {
+            const q = quizData[currentQuizIndex];
+            const optionBtns = document.querySelectorAll('.quiz-opt');
+            
+            optionBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if(idx === q.answer) {
+                    btn.classList.add('bg-medical-100', 'dark:bg-medical-900/60', 'border-medical-500', 'text-medical-800', 'dark:text-medical-200');
+                } else if(idx === selectedIdx) {
+                    btn.classList.add('bg-red-100', 'dark:bg-red-900/60', 'border-red-500', 'text-red-800', 'dark:text-red-200');
+                }
+            });
+
+            if(selectedIdx === q.answer) {
+                quizScore++;
+                document.getElementById('quizFeedback').innerText = "Correct! " + q.explanation;
+                document.getElementById('quizFeedback').className = "text-sm font-semibold text-medical-600";
+            } else {
+                document.getElementById('quizFeedback').innerText = "Incorrect. " + q.explanation;
+                document.getElementById('quizFeedback').className = "text-sm font-semibold text-red-600";
+            }
+
+            document.getElementById('quizControls').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            loadQuizQuestion();
+        }
+
+        function showQuizResults() {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('quizResults').classList.remove('hidden');
+            document.getElementById('quizScoreText').innerText = `You scored ${quizScore} out of ${quizData.length} (${Math.round((quizScore/quizData.length)*100)}%)`;
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quizContainer').classList.remove('hidden');
+            document.getElementById('quizResults').classList.add('hidden');
+            loadQuizQuestion();
+        }
+
+        // Initialize quiz on load
+        loadQuizQuestion();
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('globalSearch');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                if(term.length > 2) {
+                    switchTab('summary');
+                    // Simple text highlight or search feedback could be added
+                }
+            });
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>
